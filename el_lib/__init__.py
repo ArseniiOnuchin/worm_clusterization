@@ -534,8 +534,8 @@ class Alpha():
             a[int(col[i]),gang[i]] += 1/(col.count(col[i]))
         x = []
         for i in range(n):
-            x += [i] * m
-        y = list(range(m)) * n
+            x += [i+1] * m
+        y = list(range(1,m+1)) * n
     
     
         fig = plt.figure(figsize=(20, 20))
