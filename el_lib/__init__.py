@@ -9,6 +9,8 @@ from scipy.sparse.linalg import eigs
 import math
 from random import shuffle
 
+import matplotlib.pyplot as plt
+
 class Alpha():
     
     def __init__(self, graph):
@@ -455,7 +457,6 @@ class Alpha():
             
         return mi_self, mi_skl, ars
 
-    '''''
     def rand_cols(self, clst_sizes, number_of_clusters):
         a = range(0, sum(clst_sizes))
         shuffle(a)
@@ -464,12 +465,68 @@ class Alpha():
             rand_colors[a[i]] = self.clcheck(i, clst_sizes, number_of_clusters)
         return rand_colors
 
+    #
+    def p_vals(self, clusters, clst_sizes, number_of_clusters, groups, title):
+        clvec=[[0 for _ in range(sum(clst_sizes))] for _ in range(1000)]
+        for i in range(1000):
+            clvec[i] = self.rand_cols(clst_sizes, number_of_clusters)
+        distvec=[[[] for i in range(len(clst_sizes))] for j in range(1000)]
+        for i in range(1000):
+            for j in range(sum(clst_sizes)):  
+                distvec[i][int(clvec[i][j])].append(j)  
+        overlap=[np.zeros((len(clst_sizes), max(groups)+1)) for i in range(1000)]
+        for i in range(1000):
+            for j in range(len(clst_sizes)):
+                for l in range(len(distvec[i][j])):
+                    for k in range(max(groups)+1):
+                        if groups[distvec[i][j][l]] == k:
+                            overlap[i][j,k]+=round(1/list(groups).count(k),5)  
+        our_vrlp=np.zeros((len(clst_sizes), max(groups)+1))
+        for i in range(sum(clst_sizes)):
+            our_vrlp[clusters[i],groups[i]]+=round(1/list(groups).count(groups[i]),5)  
+        vrlp_sample=[[[] for i in range(len(clst_sizes))] for j in range(max(groups)+1)]
+        for k in range(max(groups)+1):
+            for j in range(len(clst_sizes)):
+                 for i in range(1000):
+                    vrlp_sample[k][j].append(overlap[i][j,k])    
+        vals=np.zeros((len(clst_sizes), max(groups)+1))
+        for i in range(len(clst_sizes)):
+            for j in range(max(groups)+1):
+                c = np.array(vrlp_sample[j][i])
+                vals[i,j] = round(len(c[c>=our_vrlp[i,j]])/1000,5)     
+        vals_logged = np.zeros((len(clst_sizes), max(groups)+1))
+        for i in range(len(clst_sizes)):
+            for j in range(max(groups)+1):
+                if vals[i][j] != 0:
+                    vals_logged[i][j] = -(math.log(vals[i][j],10))
+                else:
+                    vals_logged[i][j] = 5       
+        df_logged = pd.DataFrame(vals_logged)
+        plt.imshow(df_logged)
+        plt.colorbar()
+        plt.title(title)
+        plt.show()      
+
+    def dens(self, mat, clst_vec, clst_sizes, number_of_clusters, title):
+        ord_mat = self.order_matrix(mat, clst_vec, number_of_clusters)
+        denst = np.zeros((len(clst_sizes),len(clst_sizes)))
+        for i in range(len(clst_vec)):
+            for j in range(len(clst_vec)):
+                k=self.clcheck(i, clst_sizes)
+                l=self.clcheck(j, clst_sizes)
+            if k==l:
+                denst[k,l]+=ord_mat[i,j]/(clst_sizes[k]**2-clst_sizes[k])
+            else:
+                denst[k,l]+=ord_mat[i,j]/(clst_sizes[k]*clst_sizes[l])
+        plt.imshow(denst)  
+        plt.title(title)  
+        plt.colorbar()
+        plt.show()
     
     def self_adj_rsc(self,cl1,cl2):
         k=len(cl1)
         avg = (k**2-2*k+2)/(k**2)
         return (self.mutinf(cl1, cl2) - avg)/(1-avg)
-    '''''
 
     def cluster_limit(self,colours, adj_sym):
         probability_in = np.zeros((1, len(colours)))
