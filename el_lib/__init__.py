@@ -8,6 +8,7 @@ from scipy.linalg import fractional_matrix_power
 from scipy.sparse.linalg import eigs
 import math
 from random import shuffle
+from mpl_toolkits.mplot3d import Axes3D
 
 import matplotlib.pyplot as plt
 
@@ -522,6 +523,35 @@ class Alpha():
         plt.title(title)  
         plt.colorbar()
         plt.show()
+
+    
+    def coords_diff_pics(self, gang, col, name_x='clusters', name_y='ganglions'):
+        n = len(set(col))
+        m = len(set(gang))
+        a=np.zeros((n,m))
+        for i in range(len(col)):
+            #a[int(col[i]),gang[i]] += 1/(gang.count(gang[i]))
+            a[int(col[i]),gang[i]] += 1/(col.count(col[i]))
+        x = []
+        for i in range(n):
+            x += [i] * m
+        y = list(range(m)) * n
+    
+    
+        fig = plt.figure(figsize=(20, 20))
+        z = [0] * (m*n)
+        dx = [0.5] * (m*n)
+        dy = [0.5] * (m*n)
+        dz = np.array(a).flatten()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_xlabel(name_x, fontsize=20)
+        ax.set_ylabel(name_y, fontsize=20)
+        ax.set_zlabel('overlap', fontsize=20)
+        colors = ['limegreen' if u > 0.5 else 'crimson' for u in dz]
+        numb = len(dz[dz > 0.5])
+        ax.bar3d(x,y,z, dx, dy, dz, color=colors, alpha=0.5)
+        ax.set_title(f'{n} {name_x}, the number of green bars is {numb}', fontsize=20)
+        plt.show()
     
     def self_adj_rsc(self,cl1,cl2):
         k=len(cl1)
@@ -711,3 +741,5 @@ class Alpha():
                 else: 
                     sbm[i,j]=np.random.choice([0, 1], p=[1-(connection_probabilities[0])*k*param, (connection_probabilities[0])*k*param])
         return sbm  
+
+    
