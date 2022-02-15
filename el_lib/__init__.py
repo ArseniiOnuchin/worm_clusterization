@@ -17,15 +17,22 @@ class Alpha():
     def __init__(self, graph):
         self.graph = graph
     
-    def meta_clusters(self, meta_param):
+    def meta_clusters(self, meta_param, clust=True):
 
         val_map = dict(self.graph.nodes(data=meta_param))
 
         values = [val_map.get(node) for node in self.graph.nodes()]
-        d = {ni: indi for indi, ni in enumerate(set(values))}
-        meta_clust = [d[ni] for ni in values]
 
-        return meta_clust
+        if clust==True:
+            d = {ni: indi for indi, ni in enumerate(set(values))}
+            meta_clust = [d[ni] for ni in values]
+            return meta_clust
+
+        else:
+            return values
+
+        
+
     def adjacency_mat(self):
         adj = np.array(nx.adjacency_matrix(self.graph).todense())
         return adj
