@@ -85,7 +85,7 @@ class Alpha():
     #Function for translation eigenvalues from flowmatrix to symmetric adjacency matrix of connectome
     def translation_eig_vec(self, eig_vals, eig_vecs, edges, adj, max_clust_num, tail=False):
         degrees = np.sum(adj, axis=1)
-        cr_rad = np.sqrt(np.mean(np.array(degrees)/(np.array(degrees)-1))/(np.mean(degrees)))
+        cr_rad = np.sqrt(np.mean(np.array(degrees)/(np.array([x-1 if x>1 else x for x in degrees])))/(np.mean(degrees)))
         if tail == True: 
             eig_vals = eig_vals[eig_vals > cr_rad]
         order = np.argsort(-np.abs(np.array(eig_vals)))
@@ -749,4 +749,10 @@ class Alpha():
                     sbm[i,j]=np.random.choice([0, 1], p=[1-(connection_probabilities[0])*k*param, (connection_probabilities[0])*k*param])
         return sbm  
 
-    
+    def cost_int(self, sorted_adj, zeta, alpha):
+        C_int = 0
+        for i in range(np.shape(sorted_adj)[0]):
+            for j in range(np.shape(sorted_adj)[1]):
+               C_int += sorted_adj[i,j] * (i - j)**zeta
+        
+        return alpha*C_int
