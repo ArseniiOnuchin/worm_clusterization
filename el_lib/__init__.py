@@ -192,9 +192,10 @@ class Alpha():
         colours = [[] for _ in range(num_of_clusters)]
         for i in range(1,num_of_clusters+1):
             y = vecs[:,1:i+1]
-            kmeans = KMeans(n_clusters=i+1)
-            kmeans.fit(y)
-            colours[i-1] = kmeans.labels_
+            clusters = KMeans(n_clusters=i+1)
+            clusters.fit(y)
+            clusters = self.sorted_cluster(y, clusters)
+            colours[i-1] = clusters.labels_
         return y, colours
     
     def clusters_norm_laplac(self, adj_matrix, num_of_clusters):
@@ -210,10 +211,12 @@ class Alpha():
         colours = [[] for _ in range(num_of_clusters)]
 
         for i in range(1,num_of_clusters+1):
-            y = vecs[:,1:i+1]  
-            kmeans = KMeans(n_clusters=i+1)
-            kmeans.fit(y)
-            colours[i-1] = kmeans.labels_
+            y = vecs[:,1:i+1]
+  
+            clusters = KMeans(n_clusters=i+1)
+            clusters.fit(y)
+            clusters = self.sorted_cluster(y, clusters)
+            colours[i-1] = clusters.labels_
         return y, colours
     
     #little bit different way, but the results almost the same
@@ -254,10 +257,11 @@ class Alpha():
 
         for i in range(num_of_clusters):
             y = vecs[:,:i+1].real
-  
-            kmeans = KMeans(n_clusters=i+2)
-            kmeans.fit(y)
-            colours[i] = kmeans.labels_
+
+            clusters = KMeans(n_clusters=i+2)
+            clusters.fit(y)
+            clusters = self.sorted_cluster(y, clusters)
+            colours[i] = clusters.labels_
         return colours
     
     #functions for win and wout calculating from clusterized worm matrix
