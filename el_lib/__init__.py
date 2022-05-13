@@ -166,6 +166,26 @@ class Alpha():
                     mat_sorted[i, j] = mat[indices[i], indices[j]]
         return mat_sorted
 
+
+    def power(self, cl_sizes, adj_mat):
+    #function to get adjancency matrix with clusters ordered by cluster power
+    #cl_sizes -- sizes of the clusters
+    #adj_mat -- adjancency matrix ordered by clusters
+
+        powers = np.zeros(np.shape(cl_sizes))
+        frams = self.fram(cl_sizes, len(cl_sizes))
+
+        for i in range(0,np.shape(cl_sizes)[0]):
+            if i == 0:
+                cluster_edges = np.sum(adj_mat[0:int(frams[0]), 0:int(frams[0])])
+                outside_cl_edges = np.sum(adj_mat[0:int(frams[0]), :])*2 #because matrix symmetric
+                powers[i] = cluster_edges/(outside_cl_edges - cluster_edges)
+            else:
+                cluster_edges = np.sum(adj_mat[int(frams[i-1]):int(frams[i]), int(frams[i-1]):int(frams[i])])
+                outside_cl_edges = np.sum(adj_mat[int(frams[i-1]):int(frams[i]), :])*2 #because matrix symmetric
+                powers[i] = cluster_edges/(outside_cl_edges - cluster_edges)
+        return powers
+
     def order_distances(self, distances, labels):
         indices = np.argsort(labels)
         dist_sorted = np.copy(distances)
